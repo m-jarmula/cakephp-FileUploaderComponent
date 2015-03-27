@@ -30,16 +30,16 @@ class FileUploaderComponent extends Component {
         $this->allowedExtensions = $ext;
         return $this;
     }
-    
-    public function setExt($ext){
+
+    public function setExt($ext) {
         $this->ext = $ext;
     }
 
     public function setNewFileName($name) {
         $this->newFileName = $name;
     }
-    
-    public function getNewFileName(){
+
+    public function getNewFileName() {
         return $this->newFileName;
     }
 
@@ -56,15 +56,13 @@ class FileUploaderComponent extends Component {
             return __($e->getMessage());
         }
         try {
-            $this->checkAllowedExtendsions();
+            $this->checkAllowedExtensions();
         } catch (Exception $e) {
             return __($e->getMessage());
         }
 
         if (is_uploaded_file($this->file['tmp_name'])) {
             $ext = $this->ext;
-            $nfn = $this->filename ? $this->filename . '.' . $ext : $this->randString(6). '.' . $ext;
-            $this->setNewFileName($nfn);
             if ($this->dir === false) {
                 $dirname = WWW_ROOT . 'img' . DS;
             } else {
@@ -72,17 +70,22 @@ class FileUploaderComponent extends Component {
             }
             if (!file_exists($dirname)) {
                 mkdir($dirname, 0777, true);
-            }            
-            $filePath = $dirname . $nfn;
+            }
+            $nfn = $this->filename ? $dirname . $this->filename . '.' . $ext : $dirname . $this->randString(6) . '.' . $ext;
+            $this->setNewFileName($nfn);
+            $filePath = $nfn;
             move_uploaded_file($this->file['tmp_name'], $filePath);
             return true;
         }
     }
 
     public function deleteIfExists($path) {
+       // var_dump($path);echo '<br>';
+        //var_dump(file_exists($path));die;
         if (file_exists($path)) {
             unlink($path);
         }
+        return $this;
     }
 
     protected function checkMaxFileSize() {
@@ -94,7 +97,7 @@ class FileUploaderComponent extends Component {
         return true;
     }
 
-    protected function checkAllowedExtendsions() {
+    protected function checkAllowedExtensions() {
         $file = $this->file;
         $ext = explode('/', $file['type']);
         $ext = $ext[1];
